@@ -36,13 +36,13 @@ def initialize_data(conn):
     cursor.execute(
         '''
         CREATE TABLE IF NOT EXISTS inventory (
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
-            item_name TEXT,
-            price REAL,
-            units_sold INTEGER,
-            units_left INTEGER,
-            cost_price REAL,
-            reorder_point INTEGER,
+            uuid TEXT PRIMARY KEY,
+            inbound_vessel TEXT,
+            container_id TEXT,
+            pallet_id TEXT,
+            mitam_id TEXT,
+            user_id TEXT,
+            transaction_type TEXT,
             description TEXT
         )
         '''

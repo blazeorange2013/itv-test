@@ -195,6 +195,7 @@ edited_df = st.data_editor(
     df,
     disabled=['id'], # Don't allow editing the 'id' column.
     num_rows='dynamic', # Allow appending/deleting rows.
+    num_cols='dynamic', # TEST Allow appending/deleting columns.
     column_config={
         # Show dollar sign before price columns.
         "price": st.column_config.NumberColumn(format="$%.2f"),

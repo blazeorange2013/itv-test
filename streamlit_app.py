@@ -9,7 +9,7 @@ import pandas as pd
 
 # Set the title and favicon that appear in the Browser's tab bar.
 st.set_page_config(
-    page_title='Inventory tracker',
+    page_title='HADR In-Transit Visibility (ITV) Site',
     page_icon=':shopping_bags:', # This is an emoji shortcode. Could be a URL too.
 )
 
@@ -76,7 +76,6 @@ def initialize_data(conn):
         '''
     )
     conn.commit()
-
 
 def load_data(conn):
     '''Loads the inventory data from the database.'''

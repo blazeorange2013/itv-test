@@ -35,55 +35,44 @@ def initialize_data(conn):
 
     cursor.execute(
         '''
-        CREATE TABLE IF NOT EXISTS inventory (
-            uuid TEXT PRIMARY KEY,
-            inbound_vessel TEXT,
-            container_id TEXT,
-            pallet_id TEXT,
+        CREATE TABLE IF NOT EXISTS entities (
+            entity_uuid TEXT PRIMARY KEY,
+            entity_type TEXT,
             mitam_id TEXT,
-            user_id TEXT,
-            transaction_type TEXT,
-            description TEXT
+            deliverying_vessel_name TEXT,
+            entity_inventory TEXT
         )
         '''
     )
 
     cursor.execute(
         '''
-        INSERT INTO inventory
-            (item_name, price, units_sold, units_left, cost_price, reorder_point, description)
-        VALUES
-            -- Beverages
-            ('Bottled Water (500ml)', 1.50, 115, 15, 0.80, 16, 'Hydrating bottled water'),
-            ('Soda (355ml)', 2.00, 93, 8, 1.20, 10, 'Carbonated soft drink'),
-            ('Energy Drink (250ml)', 2.50, 12, 18, 1.50, 8, 'High-caffeine energy drink'),
-            ('Coffee (hot, large)', 2.75, 11, 14, 1.80, 5, 'Freshly brewed hot coffee'),
-            ('Juice (200ml)', 2.25, 11, 9, 1.30, 5, 'Fruit juice blend'),
+        CREATE TABLE IF NOT EXISTS transactions (
+            transaction_id TEXT PRIMARY KEY,
+            entity_uuid TEXT FOREIGN KEY,
+            transaction_type TEXT,
+            transaction_location TEXT,
+            user_id TEXT FOREIGN KEY
+        )
+        '''
+    )
 
-            -- Snacks
-            ('Potato Chips (small)', 2.00, 34, 16, 1.00, 10, 'Salted and crispy potato chips'),
-            ('Candy Bar', 1.50, 6, 19, 0.80, 15, 'Chocolate and candy bar'),
-            ('Granola Bar', 2.25, 3, 12, 1.30, 8, 'Healthy and nutritious granola bar'),
-            ('Cookies (pack of 6)', 2.50, 8, 8, 1.50, 5, 'Soft and chewy cookies'),
-            ('Fruit Snack Pack', 1.75, 5, 10, 1.00, 8, 'Assortment of dried fruits and nuts'),
-
-            -- Personal Care
-            ('Toothpaste', 3.50, 1, 9, 2.00, 5, 'Minty toothpaste for oral hygiene'),
-            ('Hand Sanitizer (small)', 2.00, 2, 13, 1.20, 8, 'Small sanitizer bottle for on-the-go'),
-            ('Pain Relievers (pack)', 5.00, 1, 5, 3.00, 3, 'Over-the-counter pain relief medication'),
-            ('Bandages (box)', 3.00, 0, 10, 2.00, 5, 'Box of adhesive bandages for minor cuts'),
-            ('Sunscreen (small)', 5.50, 6, 5, 3.50, 3, 'Small bottle of sunscreen for sun protection'),
-
-            -- Household
-            ('Batteries (AA, pack of 4)', 4.00, 1, 5, 2.50, 3, 'Pack of 4 AA batteries'),
-            ('Light Bulbs (LED, 2-pack)', 6.00, 3, 3, 4.00, 2, 'Energy-efficient LED light bulbs'),
-            ('Trash Bags (small, 10-pack)', 3.00, 5, 10, 2.00, 5, 'Small trash bags for everyday use'),
-            ('Paper Towels (single roll)', 2.50, 3, 8, 1.50, 5, 'Single roll of paper towels'),
-            ('Multi-Surface Cleaner', 4.50, 2, 5, 3.00, 3, 'All-purpose cleaning spray'),
-
-            -- Others
-            ('Lottery Tickets', 2.00, 17, 20, 1.50, 10, 'Assorted lottery tickets'),
-            ('Newspaper', 1.50, 22, 20, 1.00, 5, 'Daily newspaper')
+    cursor.execute(
+        '''
+        CREATE TABLE IF NOT EXISTS users (
+            user_id TEXT PRIMARY KEY,
+            last_name TEXT,
+            first_name TEXT,
+            email TEXT,
+            phone_number TEXT,
+            organization TEXT,
+            sponsor_first TEXT,
+            sponsor_last TEXT,
+            sponsor_email TEXT,
+            sponsor_phone TEXT,
+            user_type TEXT,
+            password_hash TEXT
+        )
         '''
     )
     conn.commit()
@@ -94,24 +83,58 @@ def load_data(conn):
     cursor = conn.cursor()
 
     try:
-        cursor.execute('SELECT * FROM inventory')
+        cursor.execute('SELECT * FROM entities')
         data = cursor.fetchall()
     except:
         return None
 
-    df = pd.DataFrame(data,
+    df_entities = pd.DataFrame(data,
         columns=[
-            'id',
-            'item_name',
-            'price',
-            'units_sold',
-            'units_left',
-            'cost_price',
-            'reorder_point',
-            'description',
+            'entity_uuid',
+            'entity_type',
+            'mitam_id',
+            'deliverying_vessel_name',
+            'entity_inventory'
         ])
 
-    return df
+    try:
+        cursor.execute('SELECT * FROM transactions')
+        data = cursor.fetchall()
+    except:
+        return None
+
+    df_entities = pd.DataFrame(data,
+        columns=[
+            'transaction_id',
+            'entity_uuid',
+            'transaction_type',
+            'transaction_location',
+            'user_id'
+        ])
+
+    try:
+        cursor.execute('SELECT * FROM users')
+        data = cursor.fetchall()
+    except:
+        return None
+
+    df_entities = pd.DataFrame(data,
+        columns=[
+            'user_id',
+            'last_name',
+            'first_name',
+            'email',
+            'phone_number',
+            'organization',
+            'sponsor_first',
+            'sponsor_last',
+            'sponsor_email',
+            'sponsor_phone',
+            'user_type',
+            'password_hash'
+        ])
+
+    return df_entities, df_transactions, df_users
 
 
 def update_data(conn, df, changes):
